@@ -201,6 +201,7 @@ On succesful return of list
     ]
     
 On unsuccesful request due to authentication
+    
     401 Unauthorized
     
     Body
