@@ -138,14 +138,8 @@ On unsuccesful publish due to authentication issues
 ### Follow
 
     PUT /follow/:username
-    
-    Content-type : application/json
+
     Authorization : Bearer JWT
-    
-    Body
-    {
-      "follow" : String (username)
-    }
     
 Adds "username" to list of followed people of logged in user
 
@@ -180,7 +174,7 @@ If username is already being followed
     
 ### Feed
 
-    GET /feed?username=
+    GET /feed
     
     Authorization : Bearer JWT
     
