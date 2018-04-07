@@ -1,0 +1,28 @@
+{
+  "name": "blogapi",
+  "version": "1.0.0",
+  "description": "This repository contains APIs used in a typical blog application. The application provides following features to its users",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vishu160196/BlogAPI.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vishu160196/BlogAPI/issues"
+  },
+  "homepage": "https://github.com/vishu160196/BlogAPI#readme",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "express": "^4.16.3",
+    "jsonwebtoken": "^8.2.1",
+    "mongodb": "^3.0.5",
+    "mongoose": "^5.0.13",
+    "morgan": "^1.9.0"
+  }
+}
