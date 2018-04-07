@@ -29,7 +29,7 @@ app.use(function(req, res, next) {
 
 var mongodb = require('mongodb')
 var mongoclient = mongodb.MongoClient
-var url = 'mongodb://vishu160196:Y%40nkeeD00dle@ds237489.mlab.com:37489/user'
+var url = process.env.URL
 
 exports.mongoclient=mongoclient
 exports.url=url
