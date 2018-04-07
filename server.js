@@ -34,7 +34,7 @@ var url = process.env.URL
 exports.mongoclient=mongoclient
 exports.url=url
 
-var port = 8080;
+var port = process.env.PORT || 5000;
 
 var routes = require('./routes');
 routes(app);
