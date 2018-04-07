@@ -29,23 +29,28 @@ exports.register = function(req, res) {
     var user = new models.User(username, password, firstname, lastname)
     // create a new entry in users collection
     mongoclient.connect(url, {uri_decode_auth : true}, function(err, db){
-        db=db.db('user')
-        db.collection('users', function(err, collection){
-            if (err)
-                res.status(500).send(JSON.stringify({error:err.toString()}));
-            else{
-                collection.insertOne(user, function(err, result){
-                    if(err){
-                        res.statusMessage='Internal server error'
-                        res.status(500).send(JSON.stringify({error : err.errmsg}))
-                    }
-                    else{
-                        res.statusMessage='Created'
-                        res.status(201).send(JSON.stringify({message: 'user created succesfully'}))
-                    }
-                })
-            }
-        })
+        if(!err){
+            db=db.db('user')
+            db.collection('users', function(err, collection){
+                if (err)
+                    res.status(500).send(JSON.stringify({error:err.toString()}));
+                else{
+                    collection.insertOne(user, function(err, result){
+                        if(err){
+                            res.statusMessage='Internal server error'
+                            res.status(500).send(JSON.stringify({error : err.errmsg}))
+                        }
+                        else{
+                            res.statusMessage='Created'
+                            res.status(201).send(JSON.stringify({message: 'user created succesfully'}))
+                        }
+                    })
+                }
+            })
+        }else{
+            res.statusMessage='Internal server error'
+            res.status(500).send(JSON.stringify({error: 'Unable to connect to database'}))
+        }
     })
 };
 
@@ -57,23 +62,31 @@ exports.login=function(req, res){
     if(!req.user){
 
         mongoclient.connect(url, {uri_decode_auth : true}, function(err, db){
-            db=db.db('user')
-            var doc=db.collection('users').findOne({username : username}, {password : true})
-            if(!doc){
-                res.statusMessage='Unauthorized'
-                res.status(401).send(JSON.stringify({error:'no user with this name exists'}))
+            if(!err){
+                db=db.db('user')
+                db.collection('users').findOne({username : username}, {password : true}, function(err, doc){
+                    if(!doc){
+                        res.statusMessage='Unauthorized'
+                        res.status(401).send(JSON.stringify({error:'no user with this name exists'}))
+                    }
+                    else{
+                        
+                        if(doc.password!=hash(password, doc.password.split('#')[1])){
+                            res.statusMessage='Forbidden'
+                            res.status(403).send(JSON.stringify({error:'incorrect password'}))
+                        }
+        
+                        else{
+                            res.statusMessage='OK'                    
+                            res.status(200).send(JSON.stringify({ token: jwt.sign({username:username}, secret), message : `logged in as ${username}` }))
+                        }
+                    }
+                })
+            }else{
+                res.statusMessage='Internal server error'
+                res.status(500).send(JSON.stringify({error: 'Unable to connect to database'}))
             }
-            else{
-                if(doc.password!=hash(password, doc.password.split('#')[1])){
-                    res.statusMessage='Forbidden'
-                    res.status(403).send(JSON.stringify({error:'incorrect password'}))
-                }
-
-                else{
-                    res.statusMessage='OK'                    
-                    res.status(200).send(JSON.stringify({ token: jwt.sign({username:username}, secret), message : `logged in as ${username}` }))
-                }
-            }
+            
         })
     }
 
@@ -86,37 +99,15 @@ exports.loginCheck=function(req, res){
     if(req.user)
         res.status(200).send(JSON.stringify(req.user));
     else {
-        res.status(200).send(JSON.stringify({error:'you are not logged in'}));
+        res.status(401).send(JSON.stringify({error:'you are not logged in'}));
     }
 };
-
 
 exports.loginRequired = function(req, res, next) {
   if (req.user) {
     next();
   } else {
     res.statusMessage='Unauthorized';
-    res.status(401).send(JSON.stringify({ error: 'Unauthorized user!' }));
+    res.status(401).send(JSON.stringify({ error: 'you are not logged in' }));
   }
-};
-
-exports.userExists=function (req, res) {
-    var username=req.query.username;
-
-    pool.query("select username, id from user_info where username= $1;", [username], function (err, result) {
-
-        if (err||result.rows.length===0) {
-            if(err){
-                res.status(500).send(JSON.stringify({message:err.toString()}));
-            }
-            else{
-                res.status(500).send(JSON.stringify({message:'user does not exist'}));
-            }
-        }
-
-        else {
-
-            res.status(200).send(JSON.stringify({exists:true, id:result.rows[0].id}));
-        }
-    });
 };
