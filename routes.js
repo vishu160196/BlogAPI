@@ -23,6 +23,10 @@ module.exports = function(app) {
     // })
 
     // routes
+    app.route('/test-heroku').get(function(req, res){
+        res.send('working')
+    })
+
     app.route('/login')
         .post(userHandlers.login);
 
