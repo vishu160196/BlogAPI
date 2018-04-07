@@ -1,4 +1,6 @@
-
+/**
+ * These are data models for 'users' collection. Schema for blog post and user are defined
+ */
 
 exports.Blog = class Blog{
     constructor(title, content){

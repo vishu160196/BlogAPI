@@ -1,16 +1,24 @@
+/**
+ * This module provides handlers for all activities of a logged in user. These include
+ * 1. Publishing a blog post
+ * 2. Following another user
+ * 3. Getting his blog feed 
+ */
+
 var mongoclient=require('./server').mongoclient
 var url=require('./server').url
 var models = require('./models')
 
 exports.follow = function(req, res){
-    var followed = req.params.username
-    var username=req.user.username
+    var followed = req.params.username // extract relevant information
+    var username=req.user.username     // from request
     if(followed.length===0){
         res.statusMessage='missing field values'
         res.status(500).send(JSON.stringify({error: 'one or more field values missing'}))
         return
     }
 
+    // Connect to database
     mongoclient.connect(url, {uri_decode_auth : true}, function(err, db){
         if(!err){
             db=db.db('user')

@@ -1,3 +1,11 @@
+/**
+ * This module has relevant handlers for managing users. User management includes
+ * 1. Logging in a user
+ * 2. Registering new user
+ * 3. Checking whether a user is logged in
+ * 4. Authentication of a client
+ */
+
 'use strict'
 
 var jwt=require('./server').jwt;
@@ -7,6 +15,8 @@ var mongoclient=require('./server').mongoclient
 var url=require('./server').url
 var models = require('./models')
 
+/* use this for changing plaintext passwords to encrypted strings before storing in database. At the time of authentication
+ use this function again to calculate the hashed value of received plaintext and compare with one stored in database */
 function hash(userPassword, salt) {
     var hashedPassword;
 
@@ -27,6 +37,7 @@ exports.register = function(req, res) {
     var lastname = req.body.lastname;
 
     var user = new models.User(username, password, firstname, lastname)
+    
     // create a new entry in users collection
     mongoclient.connect(url, {uri_decode_auth : true}, function(err, db){
         if(!err){
@@ -72,6 +83,7 @@ exports.login=function(req, res){
                     else{
                         
                         if(doc.password!=hash(password, doc.password.split('#')[1])){
+                            // passwords do not match
                             res.statusMessage='Forbidden'
                             res.status(403).send(JSON.stringify({error:'incorrect password'}))
                         }

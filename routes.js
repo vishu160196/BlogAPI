@@ -8,21 +8,8 @@ module.exports = function(app) {
     userHandlers = require('./usercontroller'); /* module to manage user authentication, registration, existence of a 
     user */
 
-    
-
-    
-    //var models = require('./models')(mongoose)
-
-    // app.route('/get-all').get(function(req, res){
-    //     mongoclient.connect(url, {uri_decode_auth : true}, function(err, db){
-    //         db=db.db('user')
-    //         db.collection('users').find().toArray(function(err, items){
-    //             console.log(items)
-    //         })
-    //     })
-    // })
-
     // routes
+
     app.route('/test-heroku').get(function(req, res){
         res.send('working')
     })
