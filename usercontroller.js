@@ -32,60 +32,49 @@ exports.register = function(req, res) {
         db=db.db('user')
         db.collection('users', function(err, collection){
             if (err)
-                res.status(500).send(JSON.stringify({message:err.toString()}));
+                res.status(500).send(JSON.stringify({error:err.toString()}));
             else{
                 collection.insertOne(user, function(err, result){
-                    console.log(err)
-                    console.log(result)
+                    if(err){
+                        res.statusMessage='Internal server error'
+                        res.status(500).send(JSON.stringify({error : err.errmsg}))
+                    }
+                    else{
+                        res.statusMessage='Created'
+                        res.status(201).send(JSON.stringify({message: 'user created succesfully'}))
+                    }
                 })
             }
         })
     })
-
-    // pool.query("insert into user_info(name,username,password,email) values($1, $2, $3, $4);", [name, userName, userPassword, email], function (err, result) {
-    //     if (err)
-    //         res.status(500).send(JSON.stringify({message:err.toString()}));
-
-    //     else
-    //         res.status(200).send(JSON.stringify({message:'User created successfully please login to continue'}));
-    // });
 };
 
 exports.login=function(req, res){
     var username = req.body.username;
     var password = req.body.password;
 
-    //start a session only if there is no earlier session
+    //create a token only if user is not logged in
     if(!req.user){
-        pool.query("SELECT * FROM user_info WHERE username = $1", [userName], function (err, result){
-           if (err)
-            res.status(500).send(JSON.stringify({message:err.toString()}));
 
-           else {
-            if (result.rows.length === 0)
-                res.status(404).send(JSON.stringify({message:'Username not found'}));
-
-            else {
-                var actualPassPhrase = result.rows[0].password;
-                var salt = actualPassPhrase.split('#')[1];
-
-                userPassword = hash(userPassword, salt);
-
-                if (userPassword === actualPassPhrase)
-                {
-                    var user={
-                        username:result.rows[0].username,
-                        id:result.rows[0].id
-                    };
-
-                    return res.json({ token: jwt.sign(user, secret), id : user.id });
+        mongoclient.connect(url, {uri_decode_auth : true}, function(err, db){
+            db=db.db('user')
+            var doc=db.collection('users').findOne({username : username}, {password : true})
+            if(!doc){
+                res.statusMessage='Unauthorized'
+                res.status(401).send(JSON.stringify({error:'no user with this name exists'}))
+            }
+            else{
+                if(doc.password!=hash(password, doc.password.split('#')[1])){
+                    res.statusMessage='Forbidden'
+                    res.status(403).send(JSON.stringify({error:'incorrect password'}))
                 }
 
-                else
-                    res.status(401).send(JSON.stringify({message:'Incorrect password'}));
-        }
-        }
-        });
+                else{
+                    res.statusMessage='OK'                    
+                    res.status(200).send(JSON.stringify({ token: jwt.sign({username:username}, secret), message : `logged in as ${username}` }))
+                }
+            }
+        })
     }
 
     else{

@@ -27,7 +27,14 @@ app.use(function(req, res, next) {
   }
 });
 
-var port = 8080; // Use 8080 for local development because you might already have apache running on 80
+var mongodb = require('mongodb')
+var mongoclient = mongodb.MongoClient
+var url = 'mongodb://vishu160196:Y%40nkeeD00dle@ds237489.mlab.com:37489/user'
+
+exports.mongoclient=mongoclient
+exports.url=url
+
+var port = 8080;
 
 var routes = require('./routes');
 routes(app);

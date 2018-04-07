@@ -8,19 +8,16 @@ module.exports = function(app) {
     userHandlers = require('./usercontroller'); /* module to manage user authentication, registration, existence of a 
     user */
 
-    var mongodb = require('mongodb')
-    var mongoclient = mongodb.MongoClient
-    var url = 'mongodb://vishu160196:Y%40nkeeD00dle@ds237489.mlab.com:37489/user'
+    
 
     
     //var models = require('./models')(mongoose)
 
     app.route('/get-all').get(function(req, res){
         mongoclient.connect(url, {uri_decode_auth : true}, function(err, db){
-            //db=client.db('user')
-            coll=db.collection('users')
-            coll.find({}).toArray(function(err, docs){
-                console.log(docs)
+            db=db.db('user')
+            db.collection('users').find().toArray(function(err, items){
+                console.log(items)
             })
         })
     })
